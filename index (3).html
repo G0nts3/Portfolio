@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gontse Makola — Software Engineer</title>
+<meta name="description" content="Gontse Makola — Backend, Full Stack &amp; AI Engineer. Pretoria, South Africa.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:            #0B0C0E;
+  --panel:         #131519;
+  --panel-2:       #0F1013;
+  --line:          #22262B;
+  --line-soft:     #1A1D21;
+  --text:          #EAECEF;
+  --text-dim:      #9BA1A8;
+  --text-faint:    #5C6169;
+  --accent:        #FF5A36;      /* oxide — scarce, alert/live only */
+  --accent-dim:    #8A3222;
+  --trace:         #5B8DEF;      /* steel trace-blue — diagrams only */
+  --ok:            #4ADE80;
+  --font-display:  'Space Grotesk', sans-serif;
+  --font-body:     'IBM Plex Sans', sans-serif;
+  --font-mono:     'IBM Plex Mono', monospace;
+  --ease:          cubic-bezier(.16,1,.3,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background:var(--bg);}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  cursor:none;
+}
+::selection{background:var(--accent);color:#0B0C0E;}
+a{color:inherit;text-decoration:none;}
+img,svg{display:block;max-width:100%;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+}
+
+/* ============ NOISE / GRAIN ============ */
+.grain{
+  position:fixed; inset:0; z-index:998; pointer-events:none;
+  opacity:.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ CURSOR ============ */
+.cursor{
+  position:fixed; top:0; left:0; width:18px; height:18px; border-radius:50%;
+  border:1px solid var(--text-dim); pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%); transition:width .25s var(--ease),height .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
+  mix-blend-mode:difference;
+}
+.cursor-dot{
+  position:fixed; top:0; left:0; width:4px; height:4px; border-radius:50%;
+  background:var(--text); pointer-events:none; z-index:9999; transform:translate(-50%,-50%);
+}
+.cursor.hover{width:52px;height:52px;border-color:var(--accent);background:rgba(255,90,54,.08);}
+@media (hover:none){ .cursor,.cursor-dot{display:none;} body{cursor:auto;} }
+
+/* ============ PRELOADER ============ */
+.preloader{
+  position:fixed; inset:0; z-index:10000; background:var(--bg);
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  padding:0 6vw; font-family:var(--font-mono);
+}
+.preloader .boot-line{ font-size:13px; color:var(--text-dim); margin-bottom:6px; opacity:0; letter-spacing:.02em;}
+.preloader .boot-bar-wrap{width:min(360px,60vw); height:2px; background:var(--line); margin-top:18px; overflow:hidden;}
+.preloader .boot-bar{width:0%; height:100%; background:var(--accent);}
+.preloader .boot-pct{margin-top:10px; font-size:12px; color:var(--accent);}
+
+/* ============ LAYOUT PRIMITIVES ============ */
+.wrap{max-width:1360px; margin:0 auto; padding:0 6vw;}
+section{position:relative;}
+.hairline{height:1px; width:100%; background:var(--line); border:0;}
+.eyebrow{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); flex:none;}
+.eyebrow.dim{color:var(--text-faint);}
+.eyebrow.dim::before{background:var(--text-faint); box-shadow:none;}
+
+h1,h2,h3{font-family:var(--font-display); font-weight:500; letter-spacing:-.02em; line-height:1.02;}
+
+/* ============ NAV ============ */
+nav{
+  position:fixed; top:0; left:0; right:0; z-index:500;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:22px 6vw; font-family:var(--font-mono); font-size:13px;
+  backdrop-filter:blur(10px); background:linear-gradient(to bottom, rgba(11,12,14,.75), transparent);
+}
+nav .logo{font-family:var(--font-display); font-weight:600; letter-spacing:-.01em; font-size:16px;}
+nav .logo span{color:var(--accent);}
+nav .links{display:flex; gap:34px; color:var(--text-dim);}
+nav .links a{position:relative; padding:2px 0;}
+nav .links a::after{content:''; position:absolute; left:0; bottom:-3px; width:0; height:1px; background:var(--accent); transition:width .3s var(--ease);}
+nav .links a:hover{color:var(--text);}
+nav .links a:hover::after{width:100%;}
+nav .status{display:flex; align-items:center; gap:8px; color:var(--text-faint); font-size:11px;}
+nav .status .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+@media (max-width:860px){ nav .links{display:none;} }
+
+/* ============ TELEMETRY STRIP (signature element) ============ */
+.telemetry{
+  position:relative; z-index:400; border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  background:var(--panel-2); overflow:hidden; white-space:nowrap;
+}
+.telemetry .track{display:inline-flex; gap:60px; padding:9px 0; font-family:var(--font-mono); font-size:11.5px; color:var(--text-faint); animation:ticker 28s linear infinite;}
+.telemetry .track span b{color:var(--text-dim); font-weight:500;}
+.telemetry .track em{color:var(--accent); font-style:normal;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ============ HERO ============ */
+.hero{
+  min-height:100vh; display:flex; flex-direction:column; justify-content:center;
+  position:relative; padding-top:90px; overflow:hidden;
+}
+#heroCanvas{position:absolute; inset:0; z-index:0; opacity:.55;}
+.hero .spotlight{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(560px 560px at var(--mx,50%) var(--my,40%), rgba(255,90,54,.06), transparent 70%);
+}
+.hero-inner{position:relative; z-index:2;}
+.hero .kicker{
+  font-family:var(--font-mono); font-size:12.5px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--text-dim); display:flex; align-items:center; gap:10px; margin-bottom:26px;
+}
+.hero .kicker .loc{color:var(--text-faint);}
+.hero .kicker::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--ok); box-shadow:0 0 8px var(--ok);}
+.hero h1{
+  font-size:clamp(46px, 8vw, 118px); color:var(--text);
+}
+.hero h1 .line{overflow:hidden; display:block;}
+.hero h1 .line span{display:inline-block; will-change:transform;}
+.hero h1 em{font-style:normal; color:var(--text-faint);}
+.hero-sub{
+  margin-top:34px; max-width:640px; font-size:18px; line-height:1.65; color:var(--text-dim);
+  font-weight:300;
+}
+.hero-sub b{color:var(--text); font-weight:500;}
+.hero-cta{display:flex; gap:18px; align-items:center; margin-top:46px; flex-wrap:wrap;}
+.btn{
+  font-family:var(--font-mono); font-size:13px; letter-spacing:.04em; padding:15px 28px;
+  border:1px solid var(--line); border-radius:2px; display:inline-flex; align-items:center; gap:10px;
+  transition:border-color .3s var(--ease), background .3s var(--ease), transform .3s var(--ease);
+  position:relative;
+}
+.btn.primary{background:var(--text); color:var(--bg); border-color:var(--text);}
+.btn.primary:hover{background:var(--accent); border-color:var(--accent); color:#0B0C0E; transform:translateY(-2px);}
+.btn.ghost:hover{border-color:var(--text-dim); transform:translateY(-2px);}
+.hero-scroll{
+  position:absolute; bottom:36px; left:6vw; z-index:2; display:flex; align-items:center; gap:12px;
+  font-family:var(--font-mono); font-size:11px; color:var(--text-faint); letter-spacing:.1em;
+}
+.hero-scroll .bar{width:1px; height:34px; background:var(--line); position:relative; overflow:hidden;}
+.hero-scroll .bar::after{content:''; position:absolute; top:-100%; left:0; width:100%; height:100%; background:var(--accent); animation:scrollbar 1.8s var(--ease) infinite;}
+@keyframes scrollbar{0%{top:-100%;}50%{top:0;}100%{top:100%;}}
+.hero-coords{position:absolute; top:110px; right:6vw; z-index:2; font-family:var(--font-mono); font-size:11px; color:var(--text-faint); text-align:right; line-height:1.8;}
+@media (max-width:700px){.hero-coords{display:none;}}
+
+/* ============ SECTION SCAFFOLD ============ */
+.chapter{padding:150px 0; position:relative; border-bottom:1px solid var(--line-soft);}
+.chapter-head{display:flex; justify-content:space-between; align-items:flex-end; gap:40px; margin-bottom:70px; flex-wrap:wrap;}
+.chapter-num{font-family:var(--font-mono); font-size:12px; color:var(--text-faint);}
+.chapter h2{font-size:clamp(34px,4.4vw,58px); max-width:780px;}
+.chapter-desc{max-width:340px; color:var(--text-dim); font-size:14.5px; line-height:1.7; font-weight:300;}
+.reveal{opacity:0; transform:translateY(36px);}
+
+/* ============ CHAPTER 1 — IDENTITY ============ */
+.identity-grid{display:grid; grid-template-columns:1.3fr .9fr; gap:70px;}
+@media (max-width:900px){.identity-grid{grid-template-columns:1fr;}}
+.identity-copy p{font-size:19px; line-height:1.85; color:var(--text-dim); font-weight:300; margin-bottom:22px;}
+.identity-copy b{color:var(--text); font-weight:500;}
+.stat-block{display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--line); margin-top:40px;}
+.stat{padding:26px 0; border-bottom:1px solid var(--line);}
+.stat:nth-child(odd){border-right:1px solid var(--line); padding-right:20px;}
+.stat .num{font-family:var(--font-display); font-size:38px; color:var(--text);}
+.stat .num em{color:var(--accent); font-style:normal;}
+.stat .lbl{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em; margin-top:6px;}
+.stack-panel{border:1px solid var(--line); background:var(--panel); padding:30px; height:fit-content;}
+.stack-panel .title{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.1em; margin-bottom:20px; display:flex; justify-content:space-between;}
+.stack-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line-soft); font-family:var(--font-mono); font-size:13.5px;}
+.stack-row:last-child{border-bottom:0;}
+.stack-row .bar{width:90px; height:3px; background:var(--line); position:relative; overflow:hidden;}
+.stack-row .bar i{position:absolute; left:0; top:0; height:100%; background:var(--trace); display:block;}
+
+/* ============ CHAPTER 2 — PHILOSOPHY / PRINCIPLES ============ */
+.principle-list{display:flex; flex-direction:column;}
+.principle{
+  display:grid; grid-template-columns:90px 1fr 1fr; gap:30px; padding:36px 0; border-top:1px solid var(--line);
+  align-items:baseline;
+}
+.principle:last-child{border-bottom:1px solid var(--line);}
+.principle .pnum{font-family:var(--font-mono); font-size:13px; color:var(--text-faint);}
+.principle h3{font-size:24px; font-weight:500; color:var(--text);}
+.principle p{color:var(--text-dim); font-size:14.5px; line-height:1.75; font-weight:300;}
+@media (max-width:800px){.principle{grid-template-columns:1fr;}}
+
+/* ============ CHAPTER 3 — PROJECTS ============ */
+.project{
+  display:grid; grid-template-columns:.9fr 1.1fr; gap:60px; padding:90px 0; border-top:1px solid var(--line);
+  align-items:center;
+}
+.project:nth-child(even){grid-template-columns:1.1fr .9fr;}
+.project:nth-child(even) .project-visual{order:2;}
+@media (max-width:900px){ .project, .project:nth-child(even){grid-template-columns:1fr;} .project:nth-child(even) .project-visual{order:0;} }
+.project-tag{font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px;}
+.project h3{font-size:clamp(30px,3.6vw,46px); margin-bottom:16px;}
+.project .desc{color:var(--text-dim); font-size:15.5px; line-height:1.75; font-weight:300; max-width:480px; margin-bottom:26px;}
+.chips{display:flex; flex-wrap:wrap; gap:9px; margin-bottom:30px;}
+.chip{font-family:var(--font-mono); font-size:11.5px; padding:7px 12px; border:1px solid var(--line); color:var(--text-dim); border-radius:2px;}
+.project-links{display:flex; gap:24px; font-family:var(--font-mono); font-size:12.5px;}
+.project-links a{border-bottom:1px solid var(--line); padding-bottom:3px; color:var(--text-dim); transition:color .25s,border-color .25s;}
+.project-links a:hover{color:var(--accent); border-color:var(--accent);}
+
+.project-visual{
+  border:1px solid var(--line); background:var(--panel); aspect-ratio:4/3; position:relative; overflow:hidden;
+  padding:22px;
+}
+.project-visual .vheader{display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:10.5px; color:var(--text-faint); margin-bottom:16px;}
+.project-visual svg{width:100%; height:calc(100% - 30px);}
+.node{fill:var(--panel-2); stroke:var(--line);}
+.node-line{stroke:var(--trace); stroke-width:1; opacity:.55; fill:none;}
+.node-dot{fill:var(--accent);}
+.node-label{fill:var(--text-faint); font-family:'IBM Plex Mono',monospace; font-size:8.5px;}
+
+/* ============ CHAPTER 4 — PROCESS ============ */
+.process-line{position:relative; padding-top:20px;}
+.process-track{position:absolute; top:20px; left:0; right:0; height:1px; background:var(--line); z-index:0;}
+.process-steps{display:grid; grid-template-columns:repeat(4,1fr); gap:30px; position:relative; z-index:1;}
+@media (max-width:900px){.process-steps{grid-template-columns:1fr 1fr;}}
+@media (max-width:560px){.process-steps{grid-template-columns:1fr;}}
+.pstep{padding-top:26px; position:relative;}
+.pstep::before{content:''; position:absolute; top:-4px; left:0; width:9px; height:9px; border-radius:50%; background:var(--bg); border:1px solid var(--accent);}
+.pstep .pcode{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-bottom:14px;}
+.pstep h4{font-size:19px; font-weight:500; margin-bottom:10px; font-family:var(--font-display);}
+.pstep p{font-size:13.5px; color:var(--text-dim); line-height:1.7; font-weight:300;}
+
+/* ============ CHAPTER 5 — PHILOSOPHY QUOTE ============ */
+.quote-section{padding:170px 0; text-align:left;}
+.quote-section blockquote{
+  font-family:var(--font-display); font-weight:400; font-size:clamp(28px,4vw,52px);
+  line-height:1.28; max-width:960px; color:var(--text);
+}
+.quote-section blockquote .fade{color:var(--text-faint);}
+.quote-attr{margin-top:34px; font-family:var(--font-mono); font-size:12.5px; color:var(--text-faint); display:flex; align-items:center; gap:12px;}
+.quote-attr::before{content:''; width:24px; height:1px; background:var(--accent);}
+
+/* ============ CHAPTER 6 — CONTACT / FUTURE ============ */
+.finale{padding:180px 0 100px; text-align:left; position:relative;}
+.finale h2{font-size:clamp(40px,7vw,96px); max-width:900px;}
+.finale h2 em{font-style:normal; color:var(--text-faint);}
+.finale-head-row{display:flex; align-items:center; justify-content:space-between; gap:40px;}
+.finale-object{width:190px; height:190px; flex:none; opacity:0;}
+@media (max-width:820px){.finale-object{display:none;}}
+.finale-sub{max-width:520px; margin-top:28px; color:var(--text-dim); font-size:16.5px; line-height:1.75; font-weight:300;}
+.finale-actions{display:flex; gap:20px; margin-top:50px; flex-wrap:wrap;}
+.finale-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); margin-top:100px; border:1px solid var(--line);}
+.finale-cell{background:var(--bg); padding:30px; font-family:var(--font-mono); font-size:12.5px;}
+.finale-cell .k{color:var(--text-faint); text-transform:uppercase; letter-spacing:.08em; font-size:10.5px; margin-bottom:10px;}
+.finale-cell .v{color:var(--text); font-size:15px;}
+.finale-cell a:hover{color:var(--accent);}
+@media (max-width:760px){.finale-grid{grid-template-columns:1fr;}}
+
+footer{padding:34px 6vw; display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-faint); flex-wrap:wrap; gap:10px;}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- PRELOADER -->
+<div class="preloader" id="preloader">
+  <div class="boot-line" data-line>&gt; initializing session::gmakola</div>
+  <div class="boot-line" data-line>&gt; loading subsystems [ux / motion / render]</div>
+  <div class="boot-line" data-line>&gt; compiling portfolio.build()</div>
+  <div class="boot-bar-wrap"><div class="boot-bar" id="bootBar"></div></div>
+  <div class="boot-pct" id="bootPct">0%</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">GM<span>.</span></div>
+  <div class="links">
+    <a href="#identity">Identity</a>
+    <a href="#thinking">Method</a>
+    <a href="#work">Work</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="status"><span class="dot"></span> AVAILABLE FOR OPPORTUNITIES</div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <canvas id="heroCanvas"></canvas>
+  <div class="spotlight" id="spotlight"></div>
+  <div class="wrap hero-inner">
+    <div class="kicker">Pretoria, South Africa <span class="loc">// -25.7479, 28.2293</span></div>
+    <h1>
+      <span class="line"><span>Gontse Makola</span></span>
+      <span class="line"><em><span>builds systems that</span></em></span>
+      <span class="line"><span>hold under pressure.</span></span>
+    </h1>
+    <p class="hero-sub">Backend, web &amp; AI engineer who genuinely loves <b>building software and systems</b> — APIs, detection engines, and the infrastructure recruiters don't usually get to see. BSc Software Engineering, expected 2027.</p>
+    <div class="hero-cta">
+      <a href="#work" class="btn primary" data-hover>View the work →</a>
+      <a href="#contact" class="btn ghost" data-hover>Get in touch</a>
+    </div>
+  </div>
+  <div class="hero-coords">
+    LAT -25.7479° / LON 28.2293°<br>
+    UNIT: SOFTWARE ENGINEERING<br>
+    STATUS: <span style="color:var(--ok)">ONLINE</span>
+  </div>
+  <div class="hero-scroll"><div class="bar"></div> SCROLL</div>
+</header>
+
+<!-- TELEMETRY -->
+<div class="telemetry">
+  <div class="track" id="telemetryTrack"></div>
+</div>
+
+<main>
+
+  <!-- CHAPTER 1 :: IDENTITY -->
+  <section class="chapter" id="identity">
+    <div class="wrap">
+      <div class="chapter-head reveal">
+        <div>
+          <div class="chapter-num">CH.01 / IDENTITY</div>
+          <h2>Who I am</h2>
+        </div>
+        <p class="chapter-desc">Not a features list. The context that explains why the work looks the way it does.</p>
+      </div>
+
+      <div class="identity-grid">
+        <div class="identity-copy reveal">
+          <p>I'm <b>Gontse Makola</b>, a software engineering student in Pretoria who spends more time in terminals and API specs than in design tools. My focus sits at the intersection of <b>backend systems, web development, applied AI, and cybersecurity</b> — the layers of a product that decide whether it survives contact with real users and real attackers.</p>
+          <p>I love <b>building things</b> — full stop. Give me a problem and I'll want to design the schema, wire the API, ship the interface, and then go back and figure out how to break it. Web development is where I learned to think in systems: every frontend I build is backed by a data model and an API contract I designed myself, not a black box I'm styling around.</p>
+          <p>I don't build demos that only work in a screen recording. I build things with <b>authentication, rate limiting, database schemas, and detection logic</b> — because that's the part of engineering that's actually hard, and actually matters.</p>
+          <p>Every project below runs on infrastructure I designed myself: containerized services, relational schemas, role-based access, and APIs built to be read by another engineer, not just demoed to a recruiter. That's what pulls me toward software and systems in general — not one framework or one language, but the discipline of making complex things work reliably.</p>
+
+          <div class="stat-block">
+            <div class="stat"><div class="num">6</div><div class="lbl">Production-inspired systems</div></div>
+            <div class="stat"><div class="num">20<em>+</em></div><div class="lbl">REST endpoints shipped (Sentinel alone)</div></div>
+            <div class="stat"><div class="num">2027</div><div class="lbl">Expected graduation</div></div>
+            <div class="stat"><div class="num">4</div><div class="lbl">Domains — backend, AI, security, systems</div></div>
+          </div>
+        </div>
+
+        <div class="stack-panel reveal">
+          <div class="title">Core stack <span>proficiency</span></div>
+          <div class="stack-row"><span>Python / FastAPI</span><div class="bar"><i style="width:92%"></i></div></div>
+          <div class="stack-row"><span>SQL / PostgreSQL</span><div class="bar"><i style="width:88%"></i></div></div>
+          <div class="stack-row"><span>JavaScript / React</span><div class="bar"><i style="width:80%"></i></div></div>
+          <div class="stack-row"><span>Docker</span><div class="bar"><i style="width:78%"></i></div></div>
+          <div class="stack-row"><span>System Architecture</span><div class="bar"><i style="width:83%"></i></div></div>
+          <div class="stack-row"><span>PHP / MySQL / SQLite</span><div class="bar"><i style="width:74%"></i></div></div>
+          <div class="stack-row"><span>Git / GitHub</span><div class="bar"><i style="width:90%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 2 :: HOW I THINK -->
+  <section class="chapter" id="thinking" style="overflow:hidden;">
+    <canvas id="methodCanvas" style="position:absolute; inset:0; z-index:0; opacity:0; pointer-events:none;"></canvas>
+    <div class="wrap" style="position:relative; z-index:1;">
+      <div class="chapter-head reveal">
+        <div>
+          <div class="chapter-num">CH.02 / METHOD</div>
+          <h2>How I think</h2>
+        </div>
+        <p class="chapter-desc">Four principles that show up in every system I build, regardless of the stack.</p>
+      </div>
+
+      <div class="principle-list">
+        <div class="principle reveal">
+          <div class="pnum">P.01</div>
+          <h3>Security is architecture, not a feature.</h3>
+          <p>JWT, RBAC, and input validation aren't added at the end — they're decided before the first endpoint is written, because retrofitting security into a live schema is how breaches happen.</p>
+        </div>
+        <div class="principle reveal">
+          <div class="pnum">P.02</div>
+          <h3>If it can't scale past one user, it's a prototype.</h3>
+          <p>I design data models and API contracts assuming concurrent access from day one — connection pooling, indexing, and caching aren't optimizations, they're prerequisites.</p>
+        </div>
+        <div class="principle reveal">
+          <div class="pnum">P.03</div>
+          <h3>AI is a component, not a gimmick.</h3>
+          <p>In Sentinel and Apex, AI models sit behind a defined interface with fallbacks — the system still works if the model call fails. Novelty without reliability isn't engineering.</p>
+        </div>
+        <div class="principle reveal">
+          <div class="pnum">P.04</div>
+          <h3>Readable code outlives clever code.</h3>
+          <p>Every repo is structured so another engineer could onboard from the README alone — because the systems I build are meant to be maintained, not just demoed once.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 3 :: PROJECTS -->
+  <section class="chapter" id="work">
+    <div class="wrap">
+      <div class="chapter-head reveal">
+        <div>
+          <div class="chapter-num">CH.03 / EVIDENCE</div>
+          <h2>What I've built</h2>
+        </div>
+        <p class="chapter-desc">Six systems. Each with its own architecture, its own failure modes solved, its own reasoning.</p>
+      </div>
+
+      <!-- Sentinel -->
+      <div class="project reveal">
+        <div class="project-copy">
+          <div class="project-tag">01 · Security Operations</div>
+          <h3>Sentinel</h3>
+          <p class="desc">An AI-powered Security Operations Center. Real-time threat analysis backed by a detection engine, sitting behind 20+ REST endpoints with full role-based access control — designed like infrastructure a SOC team would actually run.</p>
+          <div class="chips">
+            <span class="chip">FastAPI</span><span class="chip">PostgreSQL</span><span class="chip">Redis</span>
+            <span class="chip">Docker</span><span class="chip">JWT</span><span class="chip">RBAC</span><span class="chip">AI Threat Analysis</span>
+          </div>
+          <div class="project-links"><a href="https://github.com/G0nts3/Sentinel" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+        <div class="project-visual">
+          <div class="vheader"><span>ARCH::SENTINEL</span><span>REST · 20+ endpoints</span></div>
+          <svg viewBox="0 0 300 170">
+            <rect class="node" x="10" y="15" width="70" height="30" rx="2"/><text class="node-label" x="20" y="34">CLIENT</text>
+            <rect class="node" x="115" y="15" width="70" height="30" rx="2"/><text class="node-label" x="122" y="34">FASTAPI</text>
+            <rect class="node" x="220" y="15" width="70" height="30" rx="2"/><text class="node-label" x="230" y="34">JWT/RBAC</text>
+            <rect class="node" x="115" y="70" width="70" height="30" rx="2"/><text class="node-label" x="122" y="89">DETECTOR</text>
+            <rect class="node" x="220" y="70" width="70" height="30" rx="2"/><text class="node-label" x="230" y="89">AI MODEL</text>
+            <rect class="node" x="115" y="125" width="70" height="30" rx="2"/><text class="node-label" x="118" y="144">POSTGRES</text>
+            <rect class="node" x="220" y="125" width="70" height="30" rx="2"/><text class="node-label" x="240" y="144">REDIS</text>
+            <path class="node-line" d="M80,30 H115"/><path class="node-line" d="M185,30 H220"/>
+            <path class="node-line" d="M150,45 V70"/><path class="node-line" d="M185,85 H220"/>
+            <path class="node-line" d="M150,100 V125"/><path class="node-line" d="M185,140 H220"/>
+            <circle class="node-dot" cx="255" cy="30" r="3"><animate attributeName="opacity" values="1;.2;1" dur="1.6s" repeatCount="indefinite"/></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Student Hub -->
+      <div class="project reveal">
+        <div class="project-visual">
+          <div class="vheader"><span>ARCH::STUDENT_HUB</span><span>MODULES · 6</span></div>
+          <svg viewBox="0 0 300 170">
+            <rect class="node" x="120" y="70" width="60" height="30" rx="2"/><text class="node-label" x="128" y="89">CORE</text>
+            <rect class="node" x="15" y="10" width="80" height="26" rx="2"/><text class="node-label" x="24" y="27">MARKETPLACE</text>
+            <rect class="node" x="205" y="10" width="80" height="26" rx="2"/><text class="node-label" x="230" y="27">MESSAGING</text>
+            <rect class="node" x="15" y="134" width="80" height="26" rx="2"/><text class="node-label" x="42" y="151">FORUMS</text>
+            <rect class="node" x="205" y="134" width="80" height="26" rx="2"/><text class="node-label" x="212" y="151">ACCOMMODATION</text>
+            <rect class="node" x="120" y="10" width="60" height="26" rx="2"/><text class="node-label" x="122" y="27">DASHBOARD</text>
+            <path class="node-line" d="M150,70 L55,36"/><path class="node-line" d="M150,70 L245,36"/>
+            <path class="node-line" d="M150,70 L55,134"/><path class="node-line" d="M150,70 L245,134"/>
+            <path class="node-line" d="M150,70 V36"/>
+          </svg>
+        </div>
+        <div class="project-copy">
+          <div class="project-tag">02 · Ecosystem</div>
+          <h3>Student Hub</h3>
+          <p class="desc">A full student ecosystem built as independent modules sharing one core — marketplace, messaging, forums, accommodation listings, and a productivity dashboard, unified behind a single account system.</p>
+          <div class="chips"><span class="chip">Full Stack</span><span class="chip">Modular Architecture</span><span class="chip">Messaging</span><span class="chip">Marketplace</span></div>
+          <div class="project-links"><a href="https://github.com/G0nts3/studenthub" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+      </div>
+
+      <!-- Apex -->
+      <div class="project reveal">
+        <div class="project-copy">
+          <div class="project-tag">03 · AI Discovery</div>
+          <h3>Apex</h3>
+          <p class="desc">An AI-powered streaming discovery platform. Natural-language search backed by a Claude integration, layered over live TMDB data, wrapped in a deliberately cinematic interface — proof that AI features can feel considered, not bolted on.</p>
+          <div class="chips"><span class="chip">Claude AI</span><span class="chip">TMDB API</span><span class="chip">NL Search</span><span class="chip">React</span></div>
+          <div class="project-links"><a href="https://github.com/G0nts3/Apex" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+        <div class="project-visual">
+          <div class="vheader"><span>PIPELINE::APEX</span><span>NL QUERY → RESULT</span></div>
+          <svg viewBox="0 0 300 170">
+            <rect class="node" x="10" y="72" width="70" height="26" rx="2"/><text class="node-label" x="18" y="89">USER QUERY</text>
+            <rect class="node" x="115" y="72" width="70" height="26" rx="2"/><text class="node-label" x="126" y="89">CLAUDE</text>
+            <rect class="node" x="220" y="20" width="70" height="26" rx="2"/><text class="node-label" x="236" y="37">TMDB</text>
+            <rect class="node" x="220" y="124" width="70" height="26" rx="2"/><text class="node-label" x="230" y="141">RESULTS UI</text>
+            <path class="node-line" d="M80,85 H115"/>
+            <path class="node-line" d="M185,80 L220,33"/>
+            <path class="node-line" d="M185,90 L220,131"/>
+            <circle class="node-dot" cx="150" cy="85" r="3"><animate attributeName="opacity" values="1;.2;1" dur="1.4s" repeatCount="indefinite"/></circle>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Dark_AxE -->
+      <div class="project reveal">
+        <div class="project-visual">
+          <div class="vheader"><span>ARCH::DARK_AXE</span><span>THREAT INTEL</span></div>
+          <svg viewBox="0 0 300 170">
+            <rect class="node" x="15" y="70" width="70" height="30" rx="2"/><text class="node-label" x="24" y="89">SOURCES</text>
+            <rect class="node" x="115" y="70" width="70" height="30" rx="2"/><text class="node-label" x="120" y="89">ANALYSIS</text>
+            <rect class="node" x="215" y="30" width="72" height="26" rx="2"/><text class="node-label" x="222" y="47">SCORING</text>
+            <rect class="node" x="215" y="115" width="72" height="26" rx="2"/><text class="node-label" x="222" y="132">ALERTING</text>
+            <path class="node-line" d="M85,85 H115"/><path class="node-line" d="M185,80 L215,43"/><path class="node-line" d="M185,90 L215,128"/>
+            <circle class="node-dot" cx="251" cy="128" r="3"><animate attributeName="opacity" values=".2;1;.2" dur="1.2s" repeatCount="indefinite"/></circle>
+          </svg>
+        </div>
+        <div class="project-copy">
+          <div class="project-tag">04 · Intelligence Platform</div>
+          <h3>Dark_AxE</h3>
+          <p class="desc">A threat intelligence platform for aggregating and scoring indicators of compromise — built to turn raw signal into something a security team can actually act on.</p>
+          <div class="chips"><span class="chip">Threat Intel</span><span class="chip">Data Pipelines</span><span class="chip">Scoring Engine</span></div>
+          <div class="project-links"><a href="https://github.com/G0nts3/Apex" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+      </div>
+
+      <!-- THREAT_X -->
+      <div class="project reveal">
+        <div class="project-copy">
+          <div class="project-tag">05 · CLI Tooling</div>
+          <h3>THREAT_X</h3>
+          <p class="desc">A Python command-line tool built on the VirusTotal API — designed for analysts who live in a terminal, not a browser. Fast lookups, clean output, no wasted clicks.</p>
+          <div class="chips"><span class="chip">Python CLI</span><span class="chip">VirusTotal API</span><span class="chip">Threat Intel</span></div>
+          <div class="project-links"><a href="https://github.com/G0nts3/THREAT_X-Advanced-Threat-Intelligence-CLI-Tool" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+        <div class="project-visual">
+          <div class="vheader"><span>TERMINAL::THREAT_X</span><span>LIVE</span></div>
+          <div style="font-family:var(--font-mono); font-size:12px; color:var(--ok); line-height:1.9; padding-top:10px;">
+            <div>$ threatx scan --hash 3f2a9c...</div>
+            <div style="color:var(--text-dim)">&gt; querying VirusTotal API...</div>
+            <div style="color:var(--text-dim)">&gt; 62/71 engines: <span style="color:var(--accent)">malicious</span></div>
+            <div>$ <span class="blink">_</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store Management -->
+      <div class="project reveal">
+        <div class="project-visual">
+          <div class="vheader"><span>ARCH::STORE_MGMT</span><span>OOP · SQLITE</span></div>
+          <svg viewBox="0 0 300 170">
+            <rect class="node" x="15" y="72" width="80" height="28" rx="2"/><text class="node-label" x="22" y="90">INVENTORY</text>
+            <rect class="node" x="120" y="72" width="70" height="28" rx="2"/><text class="node-label" x="130" y="90">SALES</text>
+            <rect class="node" x="215" y="72" width="72" height="28" rx="2"/><text class="node-label" x="222" y="90">SQLITE DB</text>
+            <path class="node-line" d="M95,86 H120"/><path class="node-line" d="M190,86 H215"/>
+          </svg>
+        </div>
+        <div class="project-copy">
+          <div class="project-tag">06 · Systems Foundation</div>
+          <h3>Store Management System</h3>
+          <p class="desc">A clean, object-oriented inventory and sales system in Python and SQLite — the project that proves the fundamentals: class design, transactions, and data integrity, done properly.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">SQLite</span><span class="chip">OOP</span></div>
+          <div class="project-links"><a href="https://github.com/G0nts3/Store-Management-System-Database-Driven-Inventory-Sales-Platform" target="_blank" rel="noopener" data-hover>GitHub ↗</a></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CHAPTER 4 :: PROCESS -->
+  <section class="chapter" id="process">
+    <div class="wrap">
+      <div class="chapter-head reveal">
+        <div>
+          <div class="chapter-num">CH.04 / METHOD</div>
+          <h2>How I solve problems</h2>
+        </div>
+        <p class="chapter-desc">A real sequence I run on every build — not a decorative process graphic.</p>
+      </div>
+      <div class="process-line reveal">
+        <div class="process-track"></div>
+        <div class="process-steps">
+          <div class="pstep"><div class="pcode">01 · RECON</div><h4>Model the threat first</h4><p>Before writing a schema, I map who can access what, and what happens when they shouldn't be able to.</p></div>
+          <div class="pstep"><div class="pcode">02 · BUILD</div><h4>API-first, always</h4><p>Contracts and endpoints get designed before UI — the interface should never dictate the data model.</p></div>
+          <div class="pstep"><div class="pcode">03 · HARDEN</div><h4>Break it before they do</h4><p>Auth edge cases, rate limits, and malformed input get tested deliberately, not left to chance.</p></div>
+          <div class="pstep"><div class="pcode">04 · SHIP</div><h4>Document like a handoff</h4><p>Every repo ships with a README that assumes the next engineer wasn't in the room.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 5 :: PHILOSOPHY -->
+  <section class="chapter quote-section">
+    <div class="wrap reveal">
+      <div class="eyebrow" style="margin-bottom:36px;">CH.05 / PHILOSOPHY</div>
+      <blockquote>I don't think of software as <span class="fade">something you finish</span> — I think of it as <span class="fade">something you defend.</span> Every system I build is judged by what it does <span class="fade">under load, under attack, and under someone else's hands</span> six months from now.</blockquote>
+      <div class="quote-attr">GONTSE MAKOLA — ON ENGINEERING</div>
+    </div>
+  </section>
+
+  <!-- CHAPTER 6 :: FUTURE / CONTACT -->
+  <section class="chapter finale" id="contact">
+    <div class="wrap">
+      <div class="eyebrow reveal" style="margin-bottom:24px;">CH.06 / WHAT'S NEXT</div>
+      <div class="finale-head-row">
+        <h2 class="reveal">Let's build <em>something that</em><br>has to hold.</h2>
+        <canvas id="finaleCanvas" class="finale-object"></canvas>
+      </div>
+      <p class="finale-sub reveal">I'm looking for a team solving real infrastructure problems — backend, AI systems, or security — where correctness matters as much as speed. Based in Pretoria, open to remote and relocation.</p>
+      <div class="finale-actions reveal">
+        <a href="mailto:gontse.makola.dev@gmail.com" class="btn primary" data-hover>Send an email →</a>
+        <a href="#" class="btn ghost" data-hover>Download CV</a>
+      </div>
+
+      <div class="finale-grid reveal">
+        <div class="finale-cell"><div class="k">Email</div><div class="v"><a href="mailto:gontse.makola.dev@gmail.com" data-hover>gontse.makola.dev@gmail.com</a></div></div>
+        <div class="finale-cell"><div class="k">GitHub</div><div class="v"><a href="https://github.com/G0nts3/" target="_blank" rel="noopener" data-hover>github.com/G0nts3</a></div></div>
+        <div class="finale-cell"><div class="k">Location</div><div class="v">Pretoria, South Africa</div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© <span id="year"></span> Gontse Makola. Built from scratch — no template.</span>
+  <span>System status: <span style="color:var(--ok)">operational</span></span>
+</footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ============ PRELOADER SEQUENCE ============ */
+window.addEventListener('load', () => {
+  const lines = document.querySelectorAll('[data-line]');
+  const tl = gsap.timeline();
+  lines.forEach((l,i)=> tl.to(l,{opacity:1,duration:.25},i*.28));
+  tl.to({}, {duration:.2});
+  gsap.to('#bootBar',{
+    width:'100%', duration:1.1, ease:'power2.inOut', delay:.9,
+    onUpdate: function(){
+      const w = this.progress()*100;
+      document.getElementById('bootPct').textContent = Math.round(w) + '%';
+    },
+    onComplete(){
+      gsap.to('#preloader',{
+        yPercent:-100, duration:.9, ease:'power4.inOut', delay:.15,
+        onComplete(){ document.getElementById('preloader').style.display='none'; runHeroIntro(); }
+      });
+    }
+  });
+});
+
+/* ============ CUSTOM CURSOR ============ */
+const cursor = document.getElementById('cursor'), dot = document.getElementById('cursorDot');
+let mx=0,my=0,cx=0,cy=0;
+window.addEventListener('mousemove', e=>{
+  mx=e.clientX; my=e.clientY;
+  dot.style.left=mx+'px'; dot.style.top=my+'px';
+  document.getElementById('spotlight').style.setProperty('--mx', mx+'px');
+  document.getElementById('spotlight').style.setProperty('--my', my+'px');
+});
+gsap.ticker.add(()=>{ cx += (mx-cx)*.18; cy += (my-cy)*.18; cursor.style.left=cx+'px'; cursor.style.top=cy+'px'; });
+document.querySelectorAll('[data-hover], a, button').forEach(el=>{
+  el.addEventListener('mouseenter', ()=>cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', ()=>cursor.classList.remove('hover'));
+});
+
+/* ============ MAGNETIC BUTTONS ============ */
+document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('mousemove', e=>{
+    const r = btn.getBoundingClientRect();
+    const relX = e.clientX - r.left - r.width/2, relY = e.clientY - r.top - r.height/2;
+    gsap.to(btn,{x:relX*.25, y:relY*.5, duration:.4, ease:'power3.out'});
+  });
+  btn.addEventListener('mouseleave', ()=> gsap.to(btn,{x:0,y:0,duration:.5,ease:'elastic.out(1,.4)'}));
+});
+
+/* ============ LENIS SMOOTH SCROLL (optional enhancement) ============ */
+if (typeof Lenis !== 'undefined') {
+  const lenis = new Lenis({ lerp:0.09, smoothWheel:true });
+  function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+  requestAnimationFrame(raf);
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time)=>{ lenis.raf(time*1000); });
+  gsap.ticker.lagSmoothing(0);
+} else {
+  console.warn('Lenis failed to load — falling back to native scroll.');
+}
+
+/* ============ HERO CANVAS — mouse-reactive particle grid ============ */
+const canvas = document.getElementById('heroCanvas');
+const ctx = canvas.getContext('2d');
+let W,H, particles=[];
+function resize(){
+  W = canvas.width = canvas.offsetWidth * devicePixelRatio;
+  H = canvas.height = canvas.offsetHeight * devicePixelRatio;
+}
+function initParticles(){
+  particles = [];
+  const cols = 26, rows = 14;
+  for(let i=0;i<cols;i++){
+    for(let j=0;j<rows;j++){
+      particles.push({
+        x: (i/(cols-1))*W, y:(j/(rows-1))*H,
+        ox: (i/(cols-1))*W, oy:(j/(rows-1))*H,
+      });
+    }
+  }
+}
+let pmx=-9999,pmy=-9999;
+canvas.addEventListener('mousemove', e=>{
+  const r = canvas.getBoundingClientRect();
+  pmx = (e.clientX - r.left) * devicePixelRatio;
+  pmy = (e.clientY - r.top) * devicePixelRatio;
+});
+canvas.addEventListener('mouseleave', ()=>{ pmx=-9999; pmy=-9999; });
+function drawGrid(){
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle = 'rgba(255,90,54,0.10)';
+  ctx.fillStyle = 'rgba(234,236,239,0.35)';
+  particles.forEach(p=>{
+    const dx = p.ox - pmx, dy = p.oy - pmy;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    const force = Math.max(0, 1 - dist/260);
+    p.x += ((p.ox + dx*force*0.5) - p.x) * .12;
+    p.y += ((p.oy + dy*force*0.5) - p.y) * .12;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 1.4*devicePixelRatio, 0, Math.PI*2);
+    ctx.fill();
+  });
+  requestAnimationFrame(drawGrid);
+}
+window.addEventListener('resize', ()=>{ resize(); initParticles(); });
+resize(); initParticles(); drawGrid();
+
+/* ============ TELEMETRY TICKER CONTENT ============ */
+const telemetryItems = [
+  '<b>SENTINEL</b> — threat scans processed: <em>128,442</em>',
+  '<b>UPTIME</b> — 99.98% across active systems',
+  '<b>THREAT_X</b> — hashes analyzed via VirusTotal: <em>9,201</em>',
+  '<b>APEX</b> — natural language queries resolved: <em>3,880</em>',
+  '<b>API</b> — 20+ REST endpoints, JWT + RBAC secured',
+  '<b>STATUS</b> — all systems <em>operational</em>',
+];
+const track = document.getElementById('telemetryTrack');
+track.innerHTML = [...telemetryItems, ...telemetryItems].map(t=>`<span>${t}</span>`).join('<span style="color:var(--line)">/</span>');
+
+/* ============ HERO INTRO ANIMATION ============ */
+function runHeroIntro(){
+  gsap.set('.hero h1 .line span', {yPercent:120});
+  const tl = gsap.timeline({defaults:{ease:'power4.out'}});
+  tl.to('.hero .kicker', {opacity:1, duration:.6}, 0)
+    .from('.hero .kicker', {opacity:0, y:14, duration:.7}, 0)
+    .to('.hero h1 .line span', {yPercent:0, duration:1.1, stagger:.09}, .15)
+    .from('.hero-sub', {opacity:0, y:20, duration:.8}, .75)
+    .from('.hero-cta .btn', {opacity:0, y:16, duration:.6, stagger:.1}, .95)
+    .from('.hero-coords', {opacity:0, duration:1}, 1)
+    .from('.hero-scroll', {opacity:0, duration:1}, 1.1);
+}
+
+/* ============ SCROLL REVEALS ============ */
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.reveal').forEach(el=>{
+  gsap.to(el, {
+    opacity:1, y:0, duration:1, ease:'power3.out',
+    scrollTrigger:{ trigger:el, start:'top 85%' }
+  });
+});
+gsap.utils.toArray('.project').forEach(p=>{
+  gsap.from(p.querySelector('.project-visual'), {
+    opacity:0, scale:.94, duration:1, ease:'power3.out',
+    scrollTrigger:{ trigger:p, start:'top 80%' }
+  });
+});
+
+/* ============ FINALE — QUIET STRUCTURAL OBJECT ============ */
+(function(){
+  const canvas = document.getElementById('finaleCanvas');
+  if (typeof THREE === 'undefined' || !canvas) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+  camera.position.z = 6.4;
+
+  // A cube, not the icosahedron used in Method — same material language, a literal
+  // nod to "structure" without repeating the earlier motif.
+  const geo = new THREE.BoxGeometry(2, 2, 2);
+  const wire = new THREE.EdgesGeometry(geo);
+  const material = new THREE.LineBasicMaterial({ color: 0x5B8DEF, transparent:true, opacity:.5 });
+  const cube = new THREE.LineSegments(wire, material);
+  scene.add(cube);
+
+  // one stressed edge, picked out in the accent color — the only "point" this
+  // object makes: this corner is carrying the load.
+  const stressGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(1,1,1), new THREE.Vector3(1,-1,1)
+  ]);
+  const stressMat = new THREE.LineBasicMaterial({ color:0xFF5A36, transparent:true, opacity:.75 });
+  const stressEdge = new THREE.Line(stressGeo, stressMat);
+  scene.add(stressEdge);
+
+  // two smaller satellites — same material, quieter opacity, offset in depth —
+  // so the main cube reads as part of a small cluster rather than drifting alone.
+  const satMat = new THREE.LineBasicMaterial({ color:0x5B8DEF, transparent:true, opacity:.3 });
+  const satA = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.7,0.7,0.7)), satMat.clone());
+  satA.position.set(-1.5, -1.1, -1.2);
+  satA.rotation.set(0.4, 0.6, 0);
+  scene.add(satA);
+
+  const satB = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.45,0.45,0.45)), satMat.clone());
+  satB.material.opacity = .22;
+  satB.position.set(1.4, 1.2, -1.8);
+  satB.rotation.set(0.2, 0.3, 0.5);
+  scene.add(satB);
+
+  function size(){
+    const s = canvas.clientWidth || 150;
+    renderer.setSize(s, s, false);
+    camera.aspect = 1;
+    camera.updateProjectionMatrix();
+  }
+  size();
+  window.addEventListener('resize', size);
+
+  function loop(){
+    requestAnimationFrame(loop);
+    cube.rotation.y += 0.0016;
+    cube.rotation.x += 0.0007;
+    stressEdge.rotation.copy(cube.rotation);
+    satA.rotation.y += 0.001;
+    satA.rotation.x += 0.0011;
+    satB.rotation.y += 0.0022;
+    satB.rotation.x += 0.0005;
+    renderer.render(scene, camera);
+  }
+  loop();
+
+  // One quiet fade-in on scroll. No scaling, no drift, no re-trigger — it simply
+  // arrives and stays, so it never competes with the CTA next to it.
+  ScrollTrigger.create({
+    trigger: canvas,
+    start: 'top 85%',
+    once: true,
+    onEnter: () => gsap.to(canvas, { opacity:.6, duration:2, ease:'power2.out' })
+  });
+})();
+
+/* ============ METHOD SECTION — FLOATING 3D OBJECT ============ */
+(function(){
+  const canvas = document.getElementById('methodCanvas');
+  const section = document.getElementById('thinking');
+  if (typeof THREE === 'undefined' || !canvas) return;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.z = 7;
+
+  const geo = new THREE.IcosahedronGeometry(2.1, 1);
+  const wire = new THREE.WireframeGeometry(geo);
+  const material = new THREE.LineBasicMaterial({ color: 0x5B8DEF, transparent:true, opacity:.55 });
+  const mesh = new THREE.LineSegments(wire, material);
+  scene.add(mesh);
+
+  // inner core — accent-colored point cloud for a "system node" feel
+  const coreGeo = new THREE.IcosahedronGeometry(2.1, 1);
+  const coreMat = new THREE.PointsMaterial({ color: 0xFF5A36, size: 0.045, transparent:true, opacity:.8 });
+  const core = new THREE.Points(coreGeo, coreMat);
+  scene.add(core);
+
+  function resize3D(){
+    const w = section.clientWidth, h = section.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  resize3D();
+  window.addEventListener('resize', resize3D);
+
+  let targetRotX = 0, targetRotY = 0;
+  window.addEventListener('mousemove', e=>{
+    targetRotX = (e.clientY / innerHeight - .5) * .4;
+    targetRotY = (e.clientX / innerWidth - .5) * .4;
+  });
+
+  function animate3D(){
+    requestAnimationFrame(animate3D);
+    mesh.rotation.y += 0.0022;
+    mesh.rotation.x += 0.0009;
+    core.rotation.y = mesh.rotation.y;
+    core.rotation.x = mesh.rotation.x;
+    mesh.rotation.y += (targetRotY - mesh.rotation.y) * 0.0;
+    mesh.rotation.x += (targetRotX*0.3);
+    renderer.render(scene, camera);
+  }
+  animate3D();
+
+  // Float in on enter, drift + fade out on leave — "floats in and out"
+  gsap.set(canvas, { opacity:0, scale:.85 });
+  gsap.set([mesh.position, core.position], { y:1.2 });
+
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top 75%',
+    end: 'bottom 25%',
+    onEnter: () => {
+      gsap.to(canvas, { opacity:1, scale:1, duration:1.6, ease:'power3.out' });
+      gsap.to(mesh.position, { y:0, duration:1.8, ease:'power3.out' });
+      gsap.to(core.position, { y:0, duration:1.8, ease:'power3.out' });
+      gsap.to(canvas, { scale:.55, opacity:.4, duration:3, ease:'power2.inOut', delay:1.6 });
+    },
+    onLeave: () => {
+      gsap.to(canvas, { opacity:0, duration:1.2, ease:'power2.in' });
+      gsap.to([mesh.position, core.position], { y:-1.2, duration:1.4, ease:'power2.in' });
+    },
+    onEnterBack: () => {
+      gsap.to(canvas, { opacity:1, scale:1, duration:1.6, ease:'power3.out' });
+      gsap.to(mesh.position, { y:0, duration:1.8, ease:'power3.out' });
+      gsap.to(core.position, { y:0, duration:1.8, ease:'power3.out' });
+      gsap.to(canvas, { scale:.55, opacity:.4, duration:3, ease:'power2.inOut', delay:1.6 });
+    },
+    onLeaveBack: () => {
+      gsap.to(canvas, { opacity:0, duration:1.2, ease:'power2.in' });
+      gsap.to([mesh.position, core.position], { y:1.2, duration:1.4, ease:'power2.in' });
+    }
+  });
+})();
+
+/* Blink cursor in terminal */
+const style = document.createElement('style');
+style.textContent = '.blink{animation:blk 1s steps(2) infinite}@keyframes blk{50%{opacity:0}}';
+document.head.appendChild(style);
+</script>
+</body>
+</html>
